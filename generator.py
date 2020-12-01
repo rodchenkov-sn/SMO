@@ -14,9 +14,11 @@ class Generator:
         self.__stats = stats
 
     def generate(self):
+        logging.debug(f'{self.__new_request_time} : {self.__id + 1} generates new request')
         request = Request(self.__new_request_time, self.__id)
         self.__new_request_time += -1 / self.__lmb * math.log(random.uniform(0, 1), math.e)
         self.__generated += 1
+        logging.debug(f'new request at {self.__new_request_time}')
         return request
 
     @property

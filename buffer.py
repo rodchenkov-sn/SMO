@@ -14,14 +14,17 @@ class Buffer:
         if self.__cursor == self.__capacity:
             self.__cursor = 0
 
+    def __len__(self):
+        return self.size
+
     def __str__(self):
-        return '; '.join(map(lambda item: str(item.source) if item is not None else 'X', self.__buffer)) \
+        return ' '.join(map(lambda item: str(item.source) if item is not None else '_', self.__buffer)) \
                + f' | active package: {self.__current_package}'
 
-    def __chose_active_package(self):
+    def __chose_active_package(self, force=False):
         curr_package_size = sum(1 for item in self.__buffer if item is not None
                                 and item.source == self.__current_package)
-        if curr_package_size == 0:
+        if curr_package_size == 0 or force:
             self.__current_package = min(
                 map(lambda item: item.source, filter(lambda x: x is not None, self.__buffer)), default=0
             )
@@ -40,7 +43,7 @@ class Buffer:
             self.__stats.request_rejected(self.__buffer[self.__cursor])
         self.__buffer[self.__cursor] = item
         self.__inc_cursor()
-        self.__chose_active_package()
+        self.__chose_active_package(force=True)
 
     def get(self):
         if self.size == 0:

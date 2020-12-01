@@ -13,17 +13,19 @@ class Stats:
         self.__requests_handled_by_source[request.source] += 1
         self.__total_wait_time += (request.left_buffer - request.created)
 
-    def show_stats(self):
-        print('Requests handled (grouped by device_id)')
+    def __str__(self):
+        self_str = ''
+        self_str += 'Requests handled (grouped by device_id)\n'
         for i in range(3):
-            print(f'\t{i}: {self.__requests_handled_by_device[i]}')
-        print('Requests handled (grouped by source_id)')
+            self_str += f'\t{i + 1}: {self.__requests_handled_by_device[i]}\n'
+        self_str += 'Requests handled (grouped by source_id)\n'
         for i in range(3):
-            print(f'\t{i}: {self.__requests_handled_by_source[i]}')
-        print('Requests rejected')
+            self_str += f'\t{i + 1}: {self.__requests_handled_by_source[i]}\n'
+        self_str += 'Requests rejected\n'
         for i in range(3):
-            print(f'\t{i}: {self.__request_rejected[i]}')
-        print(f'Average wait time: {self.__total_wait_time / sum(self.__requests_handled_by_source)}')
+            self_str += f'\t{i + 1}: {self.__request_rejected[i]}\n'
+        self_str += f'Average wait time: {self.__total_wait_time / sum(self.__requests_handled_by_source)}'
+        return self_str
 
     @property
     def total_handled(self):

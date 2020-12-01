@@ -11,14 +11,16 @@ class Device:
         self.__paused = True
 
     def handle(self, request):
+        logging.debug(f'{request.left_buffer} : {self.__device_id + 1} handles new request')
         self.__paused = False
         self.__stats.request_handled(self.__device_id, request)
         self.__current_request = request
         self.__available_at = request.left_buffer + self.__tau
+        logging.debug(f'available at {self.__available_at}')
 
-    def pause_until(self, time):
+    def pause(self):
+        logging.debug(f'{self.__available_at} : {self.__device_id} paused')
         self.__paused = True
-        self.__available_at = time
 
     @property
     def available_at(self):
