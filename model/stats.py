@@ -51,7 +51,7 @@ class Stats:
     def pause_ratio(self):
         if self.__simulation_time == 0:
             return -1
-        return sum(self.__time_paused) / self.__simulation_time
+        return sum(self.__time_paused) / (self.__simulation_time * len(self.__time_paused))
 
     @property
     def average_wait_time(self):
