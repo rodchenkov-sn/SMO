@@ -1,4 +1,4 @@
-from request import Request
+from model.request import Request
 
 import math
 import random

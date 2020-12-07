@@ -1,6 +1,15 @@
 import logging
 
 
+class BufferState:
+    def __init__(self, list_repr, active_package):
+        self.list_repr = list_repr
+        self.active_package = active_package
+
+    def __str__(self):
+        return ' '.join(map(lambda i: str(i) if i is not None else '_', self.list_repr))
+
+
 class Buffer:
     def __init__(self, capacity, stats):
         self.__capacity = capacity
@@ -32,6 +41,13 @@ class Buffer:
     @property
     def size(self):
         return sum([1 for item in self.__buffer if item is not None])
+
+    @property
+    def state(self):
+        return BufferState(
+            map(lambda request: request.source if request is not None else None, self.__buffer),
+            self.__current_package
+        )
 
     def insert(self, item):
         old_cursor = self.__cursor
