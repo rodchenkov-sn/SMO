@@ -18,6 +18,7 @@ class Session:
         self.__global_time = 0
 
     def __make_snapshot(self, event, actor, actor2=None) -> Snapshot:
+        self.__stats.set_current_time(self.__global_time)
         logging.debug(f'buffer : {self.__buffer}')
         logging.debug(f'handled : {self.__stats.total_handled}')
         logging.debug(f'rejected : {self.__stats.total_rejected}')
@@ -34,12 +35,11 @@ class Session:
 
     @property
     def done(self):
-        return self.__stats.total_handled > self.__max_requests
+        return self.__stats.total_handled >= self.__max_requests
 
     def run(self, on_step=lambda _: None) -> Stats:
         while not self.done:
             on_step(self.step())
-        self.__stats.simulation_ended(self.__global_time)
         return self.__stats
 
     def step(self) -> Snapshot:

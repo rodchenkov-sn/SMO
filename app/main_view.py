@@ -2,8 +2,6 @@ from model.session import Session, SimulationEvent
 from model.properties import default_properties, SimulationProperties
 from app.element_names import *
 
-from typing import Optional, List
-
 import PySimpleGUI as Sg
 
 
@@ -17,9 +15,7 @@ class MainView:
         self.__table_heading = ['Time', 'Event', 'Devices', 'Buffer']
 
         self.__default_results = [
-            ['Average wait time', '?'],
-            ['Rejection probability', '?'],
-            ['Pause ratio', '?']
+            ['Unknown', '?']
         ]
         self.__results_data = self.__default_results
         self.__results_heading = ['Name', 'Value']
@@ -33,7 +29,8 @@ class MainView:
                       auto_size_columns=False,
                       key=STEPS_TBL,
                       row_height=25,
-                      num_rows=20
+                      num_rows=15,
+                      alternating_row_color='#74879d'
                       )
              ],
             [Sg.Button(STEP_BTN), Sg.Button(AUTO_BTN), Sg.Button(RESET_BTN)],
@@ -43,7 +40,8 @@ class MainView:
                       auto_size_columns=False,
                       key=RESULTS_TBL,
                       row_height=25,
-                      num_rows=3
+                      num_rows=10,
+                      alternating_row_color='#74879d'
                       )
              ],
             [Sg.Text('Sources:'), Sg.Input(default_text=self.__srcs_to_input(), key=SOURCES_INP)],
@@ -111,16 +109,44 @@ class MainView:
         self.__simulation_started()
         snapshot = self.__session.step()
         self.__update_on_snapshot(snapshot)
+        self.__update_stats(snapshot.stats)
+
+    def __update_stats(self, stats):
+        try:
+            self.__results_data = [
+                ['Pause ratio', f'{stats.pause_ratio:4.3f}'],
+                ['Total generated', str(stats.total_generated)],
+                ['Total handled', str(stats.total_handled)],
+                ['Total rejected', str(stats.total_rejected)],
+                ['Average wait time', f'{stats.average_wait_time:8.3f}'],
+                ['Average handle time', f'{stats.average_handle_time:8.3f}']
+            ]
+            self.__results_data += [
+                [f'Pause ratio for {i}', f'{r:4.3f}'] for i, r in enumerate(stats.pause_ratio_by_device)
+            ]
+            self.__results_data += [
+                [f'Handled from {i}', str(h)] for i, h in enumerate(stats.total_handled_by_source)
+            ]
+            self.__results_data += [
+                [f'Rejected from {i}', str(r)] for i, r in enumerate(stats.total_rejected_by_source)
+            ]
+            self.__results_data += [
+                [f'Rejection probability for {i}', f'{p:4.3f}'] for i, p in enumerate(stats.rejection_probability_by_source)
+            ]
+            self.__results_data += [
+                [f'Average wait time for {i}', f'{t:8.3f}'] for i, t in enumerate(stats.average_wait_time_by_source)
+            ]
+            self.__results_data += [
+                [f'Average handle time for {i}', f'{t:8.3f}'] for i, t in enumerate(stats.average_handle_time_by_source)
+            ]
+            self.__window.Element(RESULTS_TBL).Update(values=self.__results_data)
+        except ZeroDivisionError:
+            pass
 
     def __on_auto(self, _):
         self.__simulation_started()
         stats = self.__session.run()
-        self.__results_data = [
-            ['Average wait time', f'{stats.average_wait_time:8.4f}'],
-            ['Rejection probability', f'{stats.rejection_probability:8.4f}'],
-            ['Pause ratio', f'{stats.pause_ratio:8.4f}']
-        ]
-        self.__window.Element(RESULTS_TBL).Update(values=self.__results_data)
+        self.__update_stats(stats)
 
     def __on_reset(self, _):
         self.__simulation_ended()

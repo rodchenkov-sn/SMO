@@ -24,7 +24,7 @@ class Device:
         if self.__state is DeviceState.PAUSED:
             self.__state = DeviceState.WORKING
             self.__stats.device_continued(self.__device_id, request.left_buffer - self.__time_paused)
-        self.__stats.request_handled(self.__device_id, request)
+        self.__stats.request_handled(self.__device_id, request, self.__tau)
         self.__current_request = request
         self.__available_at = request.left_buffer + self.__tau
         logging.debug(f'available at {self.__available_at}')
